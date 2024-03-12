@@ -2,21 +2,19 @@ package com.exam.taskNew.controller;
 
 import java.util.List;
 
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+
 
 import com.exam.taskNew.model.Commit;
+import com.exam.taskNew.model.Developer;
 import com.exam.taskNew.service.GitLabApiService;
 
-@RestController
-@RequestMapping("/gitlab")
+@Controller
+@RequestMapping("/api/v4")
 public class GitLabController {
     private final GitLabApiService gitLabApiService;
 
@@ -25,19 +23,43 @@ public class GitLabController {
     {
         this.gitLabApiService = gitLabApiService;
     }
+    
 
-    @GetMapping("/commits")
-    public ResponseEntity<List<Commit>> getCommits(@RequestParam String username, @RequestParam String repositoryName, @RequestParam(required = false) String sinceDate)
-    {
-        List<Commit> commits;
-
-        if (sinceDate != null) {
-            commits = gitLabApiService.getCommits(username, repositoryName, sinceDate);
+    @GetMapping("/projects/{PROJECT_ID}/repository/commits/main")
+    public String getDeveloper(
+            @PathVariable String PROJECT_ID,
+            Model model) {
+//        List<Commit> commits;
+        List<Developer> developers;
+        System.out.println("asdadadadaddasd");
+        if (PROJECT_ID != null) {
+//            commits = gitLabApiService.getCommits(PROJECT_ID);
+            developers = gitLabApiService.getDevelopers(PROJECT_ID);
         } else {
-            commits = gitLabApiService.getAllCommits(username, repositoryName);
+            return "error";
         }
 
-        return new ResponseEntity<>(commits, HttpStatus.OK);
+  //      model.addAttribute("commits", commits);
+        model.addAttribute("developers", developers);
+        return "developer";
+    }
+    @GetMapping("/projects/{PROJECT_ID}/repository/commits")
+    public String getCommits(
+            @PathVariable String PROJECT_ID,
+            Model model) {
+        List<Commit> commits;
+//        List<Developer> developers;
+        System.out.println("ffffffffffffffffffffffffff");
+        if (PROJECT_ID != null) {
+           commits = gitLabApiService.getCommits(PROJECT_ID);
+           //         developers = gitLabApiService.getDevelopers(PROJECT_ID);
+        } else {
+            return "error";
+        }
+
+        	model.addAttribute("commits", commits);
+       //      model.addAttribute("developers", developers);
+        return "commit-list";
     }
     @GetMapping("/commit/{id}")
     public String getCommitDetail(@PathVariable Long id, Model model) {
